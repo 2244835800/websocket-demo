@@ -1,6 +1,7 @@
-package com.gj.sendone;
+package com.game.sendone;
 
-import com.google.gson.Gson;
+//import com.google.gson.Gson;
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -13,19 +14,22 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author Gjing
  **/
-@ServerEndpoint("/test-one")
+@ServerEndpoint("/test")
 @Component
 @Slf4j
 public class MyOneToOneServer {
+    private MyOneToOneServer myOneToOneServer;
+    private String id;
     /**
      * 用于存放所有在线客户端
      */
     private static Map<String, Session> clients = new ConcurrentHashMap<>();
 
-    private Gson gson = new Gson();
+//    private JSON json = new JSON();
 
     @OnOpen
     public void onOpen(Session session) {
+        id=session.getId();
         log.info("有新的客户端上线: {}", session.getId());
         clients.put(session.getId(), session);
     }
@@ -47,10 +51,16 @@ public class MyOneToOneServer {
         throwable.printStackTrace();
     }
 
+    /**
+     * 在消息
+     *
+     * @param message 消息 格式为{userId:"",message:""}
+     */
     @OnMessage
     public void onMessage(String message) {
         log.info("收到客户端发来的消息: {}", message);
-        this.sendTo(gson.fromJson(message, Message.class));
+
+        this.sendTo(JSON.parseObject(message, Message.class));
     }
 
     /**
@@ -60,9 +70,11 @@ public class MyOneToOneServer {
      */
     private void sendTo(Message message) {
         Session s = clients.get(message.getUserId());
+        log.info(id+"向客户端发送数据，客户端ID: {}", message.getUserId());
         if (s != null) {
             try {
-                s.getBasicRemote().sendText(message.getMessage());
+                s.getBasicRemote().sendText(id+"向客户端发送数据，客户端ID:"+message.getUserId()+","+message.getMessage());
+//                s.getBasicRemote().sendText("hope 已成功发送");
             } catch (IOException e) {
                 e.printStackTrace();
             }

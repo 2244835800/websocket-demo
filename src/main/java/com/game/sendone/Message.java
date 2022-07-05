@@ -1,4 +1,4 @@
-package com.gj.sendone;
+package com.game.sendone;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
