@@ -3,6 +3,7 @@ package com.game.sendone;
 //import com.google.gson.Gson;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -39,6 +40,7 @@ public class MyOneToOneServer {
         String sessionId = session.getId();
         log.info("有客户端离线: {}", sessionId);
         clients.remove(sessionId);
+        myOneToOneServer=null;
     }
 
     @OnError
@@ -63,6 +65,7 @@ public class MyOneToOneServer {
         this.sendTo(JSON.parseObject(message, Message.class));
     }
 
+
     /**
      * 发送消息
      *
@@ -80,4 +83,5 @@ public class MyOneToOneServer {
             }
         }
     }
+
 }
