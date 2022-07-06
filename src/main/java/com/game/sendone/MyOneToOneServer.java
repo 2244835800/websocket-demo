@@ -50,7 +50,7 @@ public class MyOneToOneServer {
             log.info("发生了错误,移除客户端: {}", sessionId);
             clients.remove(sessionId);
         }
-        throwable.printStackTrace();
+//        throwable.printStackTrace();
     }
 
     /**
