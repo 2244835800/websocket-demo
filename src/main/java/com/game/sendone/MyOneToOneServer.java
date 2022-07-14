@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
+import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.util.Map;
@@ -15,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author Gjing
  **/
-@ServerEndpoint("/test")
+@ServerEndpoint("/test/{userId}")
 @Component
 @Slf4j
 public class MyOneToOneServer {
@@ -29,10 +30,10 @@ public class MyOneToOneServer {
 //    private JSON json = new JSON();
 
     @OnOpen
-    public void onOpen(Session session) {
+    public void onOpen(Session session,@PathParam("userId")String userId) {
         id=session.getId();
         log.info("有新的客户端上线: {}", session.getId());
-        clients.put(session.getId(), session);
+        clients.put(userId, session);
     }
 
     @OnClose
@@ -72,16 +73,34 @@ public class MyOneToOneServer {
      * @param message 消息对象
      */
     private void sendTo(Message message) {
-        Session s = clients.get(message.getUserId());
-        log.info(id+"向客户端发送数据，客户端ID: {}", message.getUserId());
+        Session s = clients.get(message.getReceiverId()+"");
+        log.info(id+"向客户端发送数据，客户端ID: {}", message.getReceiverId());
         if (s != null) {
             try {
-                s.getBasicRemote().sendText(id+"向客户端发送数据，客户端ID:"+message.getUserId()+","+message.getMessage());
+//                s.getBasicRemote().sendText("{\"receiverId\":\""+message.getReceiverId()+"\",\"senderId\":\""+message.getSenderId()+"\",\"content\":\""+message.getContent()+"\"}");
 //                s.getBasicRemote().sendText("hope 已成功发送");
+                s.getBasicRemote().sendText(message.toString());
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
+    /**
+     * 发送消息
+     *
+     * @param message 消息对象
+     */
+//    private void sendTo(Message message) {
+//        Session s = clients.get(message.getReceiverId());
+//        log.info(id+"向客户端发送数据，客户端ID: {}", message.getReceiverId());
+//        if (s != null) {
+//            try {
+//                s.getBasicRemote().sendText("{receiverId:\""+message.getReceiverId()+"\",senderId:\""+message.getSenderId()+"\",message:\""+message.getContent()+"\"}");
+////                s.getBasicRemote().sendText("hope 已成功发送");
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
 }
