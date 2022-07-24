@@ -3,7 +3,6 @@ package com.game.sendone;
 //import com.google.gson.Gson;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -62,8 +61,7 @@ public class MyOneToOneServer {
     @OnMessage
     public void onMessage(String message) {
         log.info("收到客户端发来的消息: {}", message);
-
-        this.sendTo(JSON.parseObject(message, Message.class));
+        this.sendTo(message);
     }
 
 
@@ -72,17 +70,21 @@ public class MyOneToOneServer {
      *
      * @param message 消息对象
      */
-    private void sendTo(Message message) {
-        Session s = clients.get(message.getReceiverId()+"");
-        log.info(id+"向客户端发送数据，客户端ID: {}", message.getReceiverId());
-        if (s != null) {
+    private void sendTo(String message) {
+        Message msg=JSON.parseObject(message, Message.class);
+        Session s = clients.get(msg.getReceiverId()+"");
+        log.info(id+"向客户端发送数据，客户端ID: {}", msg.getReceiverId());
+        if (s == null) {
+            log.info("clients中无此客户端: {}，用户未上线，insert msg to db", msg.getReceiverId());
+            // TODO: 2022/7/16  用户未上线，先将此条信息传到数据库
+        }else{
             try {
-//                s.getBasicRemote().sendText("{\"receiverId\":\""+message.getReceiverId()+"\",\"senderId\":\""+message.getSenderId()+"\",\"content\":\""+message.getContent()+"\"}");
-//                s.getBasicRemote().sendText("hope 已成功发送");
-                s.getBasicRemote().sendText(message.toString());
+                s.getBasicRemote().sendText(message);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+//                s.getBasicRemote().sendText("{\"receiverId\":\""+message.getReceiverId()+"\",\"senderId\":\""+message.getSenderId()+"\",\"content\":\""+message.getContent()+"\"}");
+//                s.getBasicRemote().sendText("hope 已成功发送");
         }
     }
 
