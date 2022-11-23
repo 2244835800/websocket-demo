@@ -35,6 +35,7 @@ public class UserOnlineInfoController {
     @PostMapping("/showInScene/{sceneId}")
     @ResponseBody
     public String firstShowInScene(HttpServletRequest request, @PathVariable("sceneId") String sceneId){
+        log.info("firstShowInScene",sceneId);
         String userId = request.getParameter("userId");
         String bodyPrefab = request.getParameter("bodyPrefab");
         String weapon1 = request.getParameter("weapon1");
